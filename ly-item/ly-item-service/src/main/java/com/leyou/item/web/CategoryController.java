@@ -23,4 +23,15 @@ public class CategoryController {
         List<Category> list = categoryService.queryCategoryListByPid(pid);
         return  ResponseEntity.ok(list);
     }
+
+    /**
+     *
+     * @param ids
+     * @return
+     */
+    @GetMapping("list/ids")
+    public ResponseEntity<List<Category>> queryCategoryByIds(@RequestParam("ids") List<Long> ids){
+        List<Category> list = categoryService.queryByIds(ids);
+        return  ResponseEntity.ok(list);
+    }
 }

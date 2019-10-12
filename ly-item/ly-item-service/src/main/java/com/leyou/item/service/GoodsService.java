@@ -117,7 +117,7 @@ public class GoodsService {
         if (detail == null){
             throw new LyException(ExceptionEnum.GOODS_DETAIL_NOT_FOUND);
         }
-        return null;
+        return detail;
     }
 
     public List<Sku> querySkuBySpuId(Long spuId) {

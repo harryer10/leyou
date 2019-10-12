@@ -20,7 +20,7 @@ public class CategoryService {
         t.setParentId(pid);
         List<Category> list = categoryMapper.select(t);
         if (CollectionUtils.isEmpty(list)){
-            throw new LyException(ExceptionEnum.CATEGRORY_NOT_FOUND);
+            throw new LyException(ExceptionEnum.CATEGORY_NOT_FOUND);
         }
         return list;
     }
@@ -28,7 +28,7 @@ public class CategoryService {
     public List<Category> queryByIds(List<Long> ids){
         List<Category> list = categoryMapper.selectByIdList(ids);
         if (CollectionUtils.isEmpty(list)){
-            throw new LyException(ExceptionEnum.CATEGRORY_NOT_FOUND);
+            throw new LyException(ExceptionEnum.CATEGORY_NOT_FOUND);
         }
         return list;
     }
