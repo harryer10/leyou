@@ -1,16 +1,17 @@
-package com.leyou.cart;
+package com.leyou;
+
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
-import org.springframework.cloud.openfeign.EnableFeignClients;
+import tk.mybatis.spring.annotation.MapperScan;
 
 @SpringBootApplication
 @EnableDiscoveryClient
-@EnableFeignClients
-public class LyCartApplication {
+@MapperScan("com.leyou.user.mapper")
+public class LyUserApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(LyCartApplication.class, args);
+        SpringApplication.run(LyUserApplication.class, args);
     }
 }
