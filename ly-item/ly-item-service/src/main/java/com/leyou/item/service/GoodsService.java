@@ -14,6 +14,7 @@ import com.leyou.item.pojo.Spu;
 import com.leyou.item.pojo.SpuDetail;
 import com.leyou.item.pojo.Stock;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,6 +45,9 @@ public class GoodsService {
 
     @Autowired
     private BrandService brandService;
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
     public PageResult<Spu> querySpuByPage(Integer page, Integer rows, Boolean saleable, String key) {
         //分页
@@ -104,12 +108,16 @@ public class GoodsService {
             throw new LyException(ExceptionEnum.GOODS_SAVE_ERROR);
         }
 
-        //新增spuDetail
+        // 新增Detail
         SpuDetail detail = spu.getSpuDetail();
         detail.setSpuId(spu.getId());
         detailMapper.insert(detail);
 
+        // 新增sku和库存
         saveSkuAndStock(spu);
+
+        // 发送mq消息
+        rabbitTemplate.convertAndSend("item.insert", spu.getId());
     }
 
     public SpuDetail queryDetailById(Long id) {
@@ -128,24 +136,8 @@ public class GoodsService {
             throw new LyException(ExceptionEnum.GOODS_SKU_NOT_FOUND);
         }
 
-        //查询库存
-//        for (Sku s : skus) {
-//            Stock stock = stockMapper.selectByPrimaryKey(s.getId());
-//            if (stock == null){
-//                throw new LyException(ExceptionEnum.GOODS_STOCK_NOT_FOUND);
-//            }
-//            s.setStock(stock.getStock());
-//        }
-        //查询库存
         List<Long> ids = skuList.stream().map(Sku::getId).collect(Collectors.toList());
-        List<Stock> stockList = stockMapper.selectByIdList(ids);
-        if (CollectionUtils.isEmpty(stockList)){
-            throw new LyException(ExceptionEnum.GOODS_STOCK_NOT_FOUND);
-        }
-        //我们把stock做成一个map，key：sku的Id，值是库存值
-        Map<Long, Integer> stockMap = stockList.stream().
-                collect(Collectors.toMap(Stock::getSkuId, Stock::getStock));
-        skuList.forEach(s -> s.setStock(stockMap.get(s.getId())));
+        loadStockInSku(ids, skuList);
         return skuList;
     }
 
@@ -175,13 +167,16 @@ public class GoodsService {
         if (count != 1){
             throw new LyException(ExceptionEnum.GOODS_UPDATE_ERROR);
         }
-        //修改detail
+        // 修改detail
         count = detailMapper.updateByPrimaryKeySelective(spu.getSpuDetail());
         if (count != 1){
             throw new LyException(ExceptionEnum.GOODS_UPDATE_ERROR);
         }
-        //新增sku和stock
+        // 新增sku和stock
         saveSkuAndStock(spu);
+
+        // 发送mq消息
+        rabbitTemplate.convertAndSend("item.update", spu.getId());
     }
 
     private void saveSkuAndStock(Spu spu) {
@@ -213,5 +208,40 @@ public class GoodsService {
         if (count != stockList.size()){
             throw new LyException(ExceptionEnum.GOODS_SAVE_ERROR);
         }
+    }
+
+    public Spu querySpuById(Long id) {
+        // 查询spu
+        Spu spu =  this.spuMapper.selectByPrimaryKey(id);
+        if (spu == null){
+            throw new LyException(ExceptionEnum.GOODS_NOT_FOUND);
+        }
+        // 查询sku
+        spu.setSkus(querySkuBySpuId(id));
+        // 查询detail
+        spu.setSpuDetail(queryDetailById(id));
+        return spu;
+    }
+
+    public List<Sku> querySkuByIds(List<Long> ids) {
+        List<Sku> skus = this.skuMapper.selectByIdList(ids);
+        if (CollectionUtils.isEmpty(skus)) {
+            throw new LyException(ExceptionEnum.GOODS_SKU_NOT_FOUND);
+        }
+
+        loadStockInSku(ids, skus);
+        return skus;
+    }
+
+    private void loadStockInSku(List<Long> ids, List<Sku> skus) {
+        //查询库存
+        List<Stock> stockList = stockMapper.selectByIdList(ids);
+        if (CollectionUtils.isEmpty(stockList)) {
+            throw new LyException(ExceptionEnum.GOODS_STOCK_NOT_FOUND);
+        }
+        //我们把stock做成一个map，key：sku的Id，值是库存值
+        Map<Long, Integer> stockMap = stockList.stream().
+                collect(Collectors.toMap(Stock::getSkuId, Stock::getStock));
+        skus.forEach(s -> s.setStock(stockMap.get(s.getId())));
     }
 }

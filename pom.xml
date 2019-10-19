@@ -15,6 +15,11 @@
         <module>ly-item</module>
         <module>ly-upload</module>
         <module>ly-search</module>
+        <module>ly-page</module>
+        <module>ly-sms</module>
+        <module>ly-user</module>
+        <module>ly-auth</module>
+        <module>ly-cart</module>
     </modules>
 
     <name>leyou</name>

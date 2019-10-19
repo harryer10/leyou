@@ -15,4 +15,7 @@ public class SpecGroup {
     private Long id;
     private Long cid;
     private String name;
+
+    @Transient
+    private List<SpecParam> params;
 }

@@ -46,7 +46,7 @@ public class GoodsController {
     }
 
     /**
-     * 商品新增
+     * 商品修改
      * @param spu
      * @return
      */
@@ -76,5 +76,29 @@ public class GoodsController {
     @GetMapping("sku/list")
     public ResponseEntity<List<Sku>> querySkuBySpuId(@RequestParam("id") Long spuId){
         return ResponseEntity.ok(goodsService.querySkuBySpuId(spuId));
+    }
+
+    /**
+     * 根据skuId的集合，查询所有的sku
+     * @param ids
+     * @return
+     */
+    @GetMapping("sku/list/ids")
+    public ResponseEntity<List<Sku>> querySkuByIds(@RequestParam("ids") List<Long> ids){
+        return ResponseEntity.ok(goodsService.querySkuByIds(ids));
+    }
+
+    /**
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("spu/{id}")
+    public ResponseEntity<Spu> querySpuById(@PathVariable("id") Long id){
+        Spu spu = this.goodsService.querySpuById(id);
+        if(spu == null){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return ResponseEntity.ok(spu);
     }
 }

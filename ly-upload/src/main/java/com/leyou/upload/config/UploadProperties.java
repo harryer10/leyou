@@ -6,7 +6,6 @@ import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
 
-//@Configuration
 @Data
 @ConfigurationProperties(prefix = "ly.upload")
 public class UploadProperties {

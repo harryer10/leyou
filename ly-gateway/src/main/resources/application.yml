@@ -9,17 +9,18 @@ eureka:
       defaultZone: http://127.0.0.1:10086/eureka
 zuul:
   prefix: /api # 添加路由前缀
-#  retryable: true
   routes:
-    item-service: /item/** # 将商品微服务映射到/item/**
+    item-service: /item/**      # 将商品微服务映射到/item/**
+    search-service: /search/**  # 将商品搜索微服务映射到/search/**
+    user-service: /user/**      # 将用户微服务映射到/user/**
+    auth-service: /auth/**      # 将授权微服务映射到/auth/**
+    cart-service: /cart/**
     upload-service:
       path: /upload/**
       serviceId: upload-service
       strip-prefix: false
-    search-service: /search/** # 将商品搜索微服务映射到/search/**
-#    user-service: /user/** # 将用户微服务映射到/user/**
-#    auth-service: /auth/** # 将授权微服务映射到/auth/**
-#    cart-service: /cart/**
+  add-host-header: true # 携带请求本身的header信息
+  sensitive-headers: #配置禁止使用头信息,这里设置为null,否则set-cookie无效
 
 hystrix:
   command:
@@ -34,3 +35,15 @@ ribbon:
   ReadTimeout: 3500 # 通信超时时间(ms)
   MaxAutoRetries: 0
   MaxAutoRetriesNextServer: 0
+ly:
+  jwt:
+    pubKeyPath: C:\\tmp\\rsa\\rsa.pub # 公钥地址
+    cookieName: LY-TOKEN
+  filter:
+    allowPaths:
+      - /api/auth
+      - /api/search
+      - /api/user/register
+      - /api/user/check
+      - /api/user/code
+      - /api/item

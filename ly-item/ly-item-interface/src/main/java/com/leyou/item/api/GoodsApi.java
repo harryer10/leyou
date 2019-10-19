@@ -24,4 +24,12 @@ public interface GoodsApi {
 
     @GetMapping("sku/list")
     List<Sku> querySkuBySpuId(@RequestParam("id") Long spuId);
+
+    /**
+     * 根据spu的id查询spu
+     * @param id
+     * @return
+     */
+    @GetMapping("spu/{id}")
+    public Spu querySpuById(@PathVariable("id") Long id);
 }

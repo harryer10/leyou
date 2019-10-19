@@ -21,8 +21,8 @@ public class SpecificationController {
      * @return
      */
     @GetMapping("groups/{cid}")
-    public ResponseEntity<List<SpecGroup>> queryGroupByCid(@PathVariable("cid") Long cid) {
-        List<SpecGroup> list = specService.queryGroupByCid(cid);
+    public ResponseEntity<List<SpecGroup>> queryByCid(@PathVariable("cid") Long cid) {
+        List<SpecGroup> list = specService.queryByCid(cid);
         return ResponseEntity.ok(list);
     }
 
@@ -35,7 +35,6 @@ public class SpecificationController {
     public ResponseEntity<List<SpecParam>> queryParamByGid(@PathVariable("gid") Long gid) {
         return ResponseEntity.ok(specService.queryParamByGid(gid));
     }
-
 
     /**
      * 根据分类Id，查询参数
@@ -50,5 +49,9 @@ public class SpecificationController {
             @RequestParam(value = "cid", required = false) Long cid,
             @RequestParam(value = "searching", required = false) Boolean searching) {
         return ResponseEntity.ok(specService.queryParamList(gid, cid, searching));
+    }
+    @GetMapping("group")
+    public  ResponseEntity<List<SpecGroup>> queryGroupByCid(@RequestParam("cid") Long cid) {
+        return ResponseEntity.ok(specService.queryGroupByCid(cid));
     }
 }
