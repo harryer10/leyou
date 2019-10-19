@@ -38,7 +38,7 @@ public class AuthController {
             @RequestParam("username") String username, @RequestParam("password") String password,
             HttpServletRequest request, HttpServletResponse response) {
         // 登录
-        String token = this.authService.login(username, password);
+        String token = "ddd";//this.authService.login(username, password);
         // 写入cookie
         CookieUtils.setCookie(request, response, prop.getCookieName(),
                 token, prop.getCookieMaxAge(), null, true);
