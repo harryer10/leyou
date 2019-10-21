@@ -14,7 +14,6 @@ import org.springframework.cloud.netflix.zuul.filters.support.FilterConstants;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
 
 @Component
 @EnableConfigurationProperties({JwtProperties.class, FilterProperties.class})

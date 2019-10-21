@@ -7,7 +7,6 @@ import com.leyou.auth.utils.JwtUtils;
 import com.leyou.common.enums.ExceptionEnum;
 import com.leyou.common.exception.LyException;
 import com.leyou.common.utils.CookieUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.http.HttpStatus;
@@ -38,7 +37,7 @@ public class AuthController {
             @RequestParam("username") String username, @RequestParam("password") String password,
             HttpServletRequest request, HttpServletResponse response) {
         // 登录
-        String token = "ddd";//this.authService.login(username, password);
+        String token = this.authService.login(username, password);
         // 写入cookie
         CookieUtils.setCookie(request, response, prop.getCookieName(),
                 token, prop.getCookieMaxAge(), null, true);
@@ -51,9 +50,8 @@ public class AuthController {
      * @return
      */
     @GetMapping("verify")
-    public ResponseEntity<UserInfo> verify(
-            @CookieValue("LY_TOKEN")String token,
-            HttpServletRequest request, HttpServletResponse response){
+    public ResponseEntity<UserInfo> verify(@CookieValue("LY_TOKEN") String token,
+                                           HttpServletRequest request, HttpServletResponse response){
         try {
             // 解析token
             UserInfo info = JwtUtils.getInfoFromToken(token, this.prop.getPublicKey());

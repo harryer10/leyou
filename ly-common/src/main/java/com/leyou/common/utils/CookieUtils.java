@@ -182,7 +182,7 @@ public final class CookieUtils {
 			String[] ary = domainName.split("\\:");
 			domainName = ary[0];
 		}
-		//domainName = "leyou.com";
+		domainName = "leyou.com";
 		return domainName;
 	}
 

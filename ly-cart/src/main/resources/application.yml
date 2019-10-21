@@ -19,4 +19,4 @@ eureka:
 ly:
   jwt:
     pubKeyPath: C:\\tmp\\rsa\\rsa.pub # 公钥地址
-    cookieName: LY-TOKEN
+    cookieName: LY_TOKEN

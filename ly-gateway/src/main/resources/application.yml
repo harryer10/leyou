@@ -15,6 +15,7 @@ zuul:
     user-service: /user/**      # 将用户微服务映射到/user/**
     auth-service: /auth/**      # 将授权微服务映射到/auth/**
     cart-service: /cart/**
+    order-service: /order/**
     upload-service:
       path: /upload/**
       serviceId: upload-service
@@ -38,12 +39,14 @@ ribbon:
 ly:
   jwt:
     pubKeyPath: C:\\tmp\\rsa\\rsa.pub # 公钥地址
-    cookieName: LY-TOKEN
+    cookieName: LY_TOKEN
   filter:
     allowPaths:
       - /api/auth
       - /api/search
-      - /api/user/register
-      - /api/user/check
-      - /api/user/code
+#      - /api/user/register
+#      - /api/user/check
+#      - /api/user/code
+      - /api/user
       - /api/item
+      - /api/cart

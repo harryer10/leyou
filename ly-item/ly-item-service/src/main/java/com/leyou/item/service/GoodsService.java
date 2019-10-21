@@ -2,6 +2,7 @@ package com.leyou.item.service;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.leyou.common.dto.CartDTO;
 import com.leyou.common.enums.ExceptionEnum;
 import com.leyou.common.exception.LyException;
 import com.leyou.common.vo.PageResult;
@@ -21,10 +22,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import tk.mybatis.mapper.entity.Example;
 
-import java.lang.reflect.Array;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 public class GoodsService {
@@ -243,5 +242,16 @@ public class GoodsService {
         Map<Long, Integer> stockMap = stockList.stream().
                 collect(Collectors.toMap(Stock::getSkuId, Stock::getStock));
         skus.forEach(s -> s.setStock(stockMap.get(s.getId())));
+    }
+
+    @Transactional
+    public void decreaseStock(List<CartDTO> carts) {
+        for (CartDTO cart : carts) {
+            //件库存
+            int count = stockMapper.decreaseStock(cart.getSkuId(), cart.getNum());
+            if (count != 1) {
+                throw new LyException(ExceptionEnum.STOCK_NOT_ENOUGH);
+            }
+        }
     }
 }

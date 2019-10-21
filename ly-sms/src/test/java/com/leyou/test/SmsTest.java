@@ -1,6 +1,6 @@
 package com.leyou.test;
 
-import com.leyou.sms.LySmsApplication;
+import com.leyou.LySmsApplication;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.amqp.core.AmqpTemplate;
