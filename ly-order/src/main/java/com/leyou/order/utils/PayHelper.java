@@ -52,20 +52,13 @@ public class PayHelper {
             //交易类型为扫码支付
             data.put("trade_type", "NATIVE");
 
-            //利用wxPay工具，完成下单
+            // 利用wxPay工具，完成下单
             Map<String, String> result = wxPay.unifiedOrder(data);
-            //判断通信和业务标识
+
+            // 判断通信和业务标识
             isSuccess(result);
-            /*//打印结果
-            for (Map.Entry<String, String> entry : result.entrySet()) {
-                String key = entry.getKey();
-                System.out.println(key + (key.length() >= 8 ? "\t:" : "\t\t: ") + entry.getValue());
 
-            }
-            System.out.println("----------------------");*/
-
-
-            //下单成功，获取支付链接
+            // 下单成功，获取支付链接
             String url = result.get("code_url");
             return url;
         } catch (Exception e) {
@@ -75,40 +68,38 @@ public class PayHelper {
     }
 
     public void isSuccess(Map<String, String> result) {
-        //判断通信标识
+        // 判断通信标识
         String returnCode = result.get("return_code");
         if (WXPayConstants.FAIL.equals(returnCode)) {
-            //通信失败
+            // 通信失败
             log.error("[微信下单] 微信下单通信失败，失败原因:{}", result.get("return_msg"));
             throw new LyException(ExceptionEnum.WX_PAY_ORDER_FAIL);
 
         }
 
-        //判断业务标识
+        // 判断业务标识
         String resultCode = result.get("result_code");
         if (WXPayConstants.FAIL.equals(resultCode)) {
-            //通信失败
+            // 通信失败
             log.error("[微信下单] 微信下单业务失败，错误码:{}，错误原因:{}",
                     result.get("err_code"), result.get("err_code_des"));
             throw new LyException(ExceptionEnum.WX_PAY_ORDER_FAIL);
-
         }
     }
 
 
     public void isValidSign(Map<String,String> data) {
         try {
-            //重新生成签名，和传过来的签名进行比较
+            // 重新生成签名，和传过来的签名进行比较
             String sign1 = WXPayUtil.generateSignature(data, payConfig.getKey(), WXPayConstants.SignType.HMACSHA256);
             String sign2 = WXPayUtil.generateSignature(data, payConfig.getKey(), WXPayConstants.SignType.MD5);
             String sign = data.get("sign");
             if (!StringUtils.equals(sign, sign1) && !StringUtils.equals(sign, sign2)) {
-                //签名有误，抛出
-                throw new LyException(ExceptionEnum.INVALID_VERIFY_CODE);
+                // 签名有误，抛出异常
+                throw new LyException(ExceptionEnum.INVALID_SIGN_ERROR);
             }
-
         } catch (Exception e) {
-
+            throw new LyException(ExceptionEnum.INVALID_SIGN_ERROR);
         }
     }
 
@@ -124,26 +115,26 @@ public class PayHelper {
             isSuccess(result);
             //校验签名
             isValidSign(result);
-            //3校验金额
+            // 3 校验金额
             String totalFeeStr = result.get("total_fee");
             String tradeNo = result.get("out_trade_no");
             if (StringUtils.isEmpty(totalFeeStr)||StringUtils.isEmpty(tradeNo)) {
                 throw new LyException(ExceptionEnum.INVALID_ORDER_PARAM);
             }
-            //3.1获取结果中的金额
+            // 3.1 获取结果中的金额
             Long totalFee = Long.valueOf(totalFeeStr);
-            //3.2获取订单金额
+            // 3.2 获取订单金额
             orderId = Long.valueOf(tradeNo);
             Order order = orderMapper.selectByPrimaryKey(orderId);
             if (totalFee != /*order.getActualPay()*/1) {
-                //金额不符
+                // 金额不符
                 throw new LyException(ExceptionEnum.INVALID_ORDER_PARAM);
             }
 
             String state = result.get("trade_state");
             if (WXPayConstants.SUCCESS.equals(state)) {
-                //支付成功
-                //4修改订单状态
+                // 支付成功
+                // 修改订单状态
                 OrderStatus status = new OrderStatus();
                 status.setStatus(OrderStatusEnum.PAYED.value());
                 status.setOrderId(orderId);
@@ -152,6 +143,8 @@ public class PayHelper {
                 if (count != 1) {
                     throw new LyException(ExceptionEnum.UPDATE_ORDER_STATUS_ERROR);
                 }
+                // 返回成功
+                return PayStateEnum.SUCCESS;
             }
             if ("NOTPAY".equals(state) || "USERPAYING".equals(state)) {
                 return PayStateEnum.NOT_PAY;

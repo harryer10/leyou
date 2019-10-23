@@ -2,8 +2,6 @@ package com.leyou.order.config;
 
 import com.github.wxpay.sdk.WXPayConfig;
 import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
 @Data

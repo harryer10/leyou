@@ -30,6 +30,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import javax.validation.constraints.NotNull;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -72,7 +73,8 @@ public class OrderService {
 
          // 1.3 收货地址
          // 获取收货人地址
-         AddressDTO addr = AddressClient.findById(orderDTO.getAddressId());
+        Long id = orderDTO.getAddressId();
+        AddressDTO addr = AddressClient.findById(id);
          order.setReceiver(addr.getName());
          order.setReceiverAddress(addr.getAddress());
          order.setReceiverCity(addr.getCity());
@@ -145,7 +147,6 @@ public class OrderService {
          return orderId;
     }
 
-
     public Order queryOrderById(Long id) {
         //查询订单
         Order order = orderMapper.selectByPrimaryKey(id);
@@ -163,52 +164,51 @@ public class OrderService {
         //查询订单状态
         OrderStatus orderStatus = statusMapper.selectByPrimaryKey(id);
         if (orderStatus == null) {
+            // 不存在
             throw new LyException(ExceptionEnum.ORDER_STATUS_NOT_FOUND);
         }
         order.setOrderStatus(orderStatus);
-
         return order;
     }
 
     public String createPayUrl(Long orderId) {
-        //查询订单
+        // 查询订单
         Order order = queryOrderById(orderId);
-        //判断订单状态
+        // 判断订单状态
         Integer status = order.getOrderStatus().getStatus();
         if (status != OrderStatusEnum.UN_PAY.value()) {
+            // 订单状态异常
             throw new LyException(ExceptionEnum.ORDER_STATUS_ERROR);
         }
-        //总金额
-        Long actualPay = order.getActualPay();
-        //商品描述
+        // 支付金额
+        Long actualPay = 1L;//order.getActualPay();  //测试用，付款  1  分钱
+        // 商品描述
         OrderDetail detail = order.getOrderDetails().get(0);
         String desc = detail.getTitle();
         return payHelper.createOrder(orderId, actualPay, desc);
-
-
     }
 
     public void handleNotify(Map<String, String> result) {
-        //1数据校验
+        // 1 数据校验
         payHelper.isSuccess(result);
-        //2校验签名
+        // 2 校验签名
         payHelper.isValidSign(result);
-        //3校验金额
+        // 3 校验金额
         String totalFeeStr = result.get("total_fee");
         String tradeNo = result.get("out_trade_no");
         if (StringUtils.isEmpty(totalFeeStr)||StringUtils.isEmpty(tradeNo)) {
             throw new LyException(ExceptionEnum.INVALID_ORDER_PARAM);
         }
-        //3.1获取结果中的金额
+        // 3.1 获取结果中的金额
         Long totalFee = Long.valueOf(totalFeeStr);
-        //3.2获取订单金额
+        // 3.2 获取订单金额
         Long orderId = Long.valueOf(tradeNo);
         Order order = orderMapper.selectByPrimaryKey(orderId);
         if (totalFee != /*order.getActualPay()*/1) {
             //金额不符
             throw new LyException(ExceptionEnum.INVALID_ORDER_PARAM);
         }
-        //4修改订单状态
+        // 4 修改订单状态
         OrderStatus status = new OrderStatus();
         status.setStatus(OrderStatusEnum.PAYED.value());
         status.setOrderId(orderId);
@@ -217,20 +217,19 @@ public class OrderService {
         if (count != 1) {
             throw new LyException(ExceptionEnum.UPDATE_ORDER_STATUS_ERROR);
         }
-        log.info("[订单回调]， 订单支付成功！订单编号：{}", orderId);
-
+        log.info("[订单回调]，订单支付成功！订单编号:{}", orderId);
     }
 
     public PayStateEnum queryOrderState(Long orderId) {
-        //查询订单状态
+        // 查询订单状态
         OrderStatus orderStatus = statusMapper.selectByPrimaryKey(orderId);
         Integer status = orderStatus.getStatus();
-        //判断是否支付
+        // 判断是否支付
         if (status != OrderStatusEnum.UN_PAY.value()) {
-            //如果已支付，真的是已支付
+            // 如果已支付，真的是已支付
             return PayStateEnum.SUCCESS;
         }
-        //如果未支付，但其实不一定是未支付，必须去微信查询支付状态
+        // 如果未支付，但其实不一定是未支付，必须去微信查询支付状态
         return payHelper.queryPayState(orderId);
     }
 }

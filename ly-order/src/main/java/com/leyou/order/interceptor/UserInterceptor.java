@@ -23,6 +23,11 @@ public class UserInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        // 放行WXPay回调函数
+        StringBuffer url = request.getRequestURL();
+        if (url.toString().contains("/notify/pay")) {
+            return true;
+        }
         // 获取cookie中的token
         String token = CookieUtils.getCookieValue(request, prop.getCookieName());
         try {

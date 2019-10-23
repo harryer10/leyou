@@ -13,5 +13,5 @@ public class AddressDTO {
     private String district;
     private String address;
     private String zipCode;
-    private Boolean isDeaul;
+    private Boolean isDefault;
 }

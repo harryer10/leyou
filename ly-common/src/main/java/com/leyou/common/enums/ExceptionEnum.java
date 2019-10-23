@@ -38,6 +38,8 @@ public enum ExceptionEnum {
     ORDER_NOT_FOUND(500, "订单未发现"),
     ORDER_DETAIL_NOT_FOUND(500, "订单详情未找到"),
     ORDER_STATUS_NOT_FOUND(500, "订单状态未找到"),
+
+    INVALID_SIGN_ERROR(500, "签名有误"),
     ;
     private int code;
     private String msg;

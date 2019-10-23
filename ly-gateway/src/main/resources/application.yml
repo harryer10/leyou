@@ -22,7 +22,6 @@ zuul:
       strip-prefix: false
   add-host-header: true # 携带请求本身的header信息
   sensitive-headers: #配置禁止使用头信息,这里设置为null,否则set-cookie无效
-
 hystrix:
   command:
     default:
@@ -30,7 +29,6 @@ hystrix:
         isolation:
           thread:
             timeoutInMillisecond: 5000 # 熔断超时时长：10000ms
-
 ribbon:
   ConnectTimeout: 1000 # 连接超时时间(ms)
   ReadTimeout: 3500 # 通信超时时间(ms)
@@ -44,9 +42,9 @@ ly:
     allowPaths:
       - /api/auth
       - /api/search
-#      - /api/user/register
-#      - /api/user/check
-#      - /api/user/code
-      - /api/user
+      - /api/user/register
+      - /api/user/check
+      - /api/user/code
       - /api/item
       - /api/cart
+      - /api/notify
