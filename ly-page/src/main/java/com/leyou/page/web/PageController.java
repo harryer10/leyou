@@ -15,14 +15,6 @@ public class PageController {
     @Autowired
     private PageService pageService;
 
-    @GetMapping("hello")
-    public String sayHello(Model model){
-        User user = new User();
-        user.setName("Tom and Jerry");
-        model.addAttribute("user", user);
-
-        return "hello";
-    }
     @GetMapping("item/{id}.html")
     public String toItemPge(@PathVariable("id") Long spuId, Model model){
         // 查询数据模型
